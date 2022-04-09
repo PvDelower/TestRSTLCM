@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  proxy:
+    image: nginx:alpine
+    container_name: rstcm_proxy
+    volumes:
+      - ./RSTKMfront/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    depends_on:
+      - client
+    networks:
+      - front
+      - back
+
+  client:
+    container_name: rstcm_client
+    volumes:
+      - ./RSTKMfront:/usr/src/app
+    tty: True
+    build: RSTKMfront/.
+    networks:
+      - front
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+
+  api:
+    container_name: rstcm_backend
+    volumes:
+      - ./RSTKMback:/usr/src/app
+    build: RSTKMback/.
+
+    command: >
+      bash -c  "python manage.py makemigrations &&
+                python manage.py migrate &&
+                python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - '8000:8000'
+    expose:
+      - '8000'
+    tty: True
+    networks:
+      - back
+
+networks:
+  front:
+    driver: bridge
+  back:
+    driver: bridge
