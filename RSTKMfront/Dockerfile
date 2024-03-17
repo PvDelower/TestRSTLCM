@@ -12,6 +12,6 @@ COPY ./ /usr/src/app
 RUN npm run build
 
 # Nginx stage
-FROM nginx:alpine
+FROM nginx:1.25.4-alpine3.18
 
 COPY --from=build-stage-node-16 /usr/src/app/build/ /usr/share/nginx/html
